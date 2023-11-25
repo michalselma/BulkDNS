@@ -1,12 +1,16 @@
 # Package: BulkDNS
 # Module: init/init_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-19
+# Rev: 2023-11-25
 
 from init import init_db
 from init import init_dict
 from common import sqlite
 from common import postgresql
+
+from common import logger
+
+log = logger.log_run()
 
 
 def run(config_dta):
@@ -31,12 +35,12 @@ def run(config_dta):
         user_password = cfg_db['user_password']
         db = postgresql.DB(db_type, db_name, db_host, db_port, user_name, user_password, retry_limit)
     else:
-        print(f'Error: Incorrect database type')
+        log.critical(f'Error: Incorrect database type')
         return
 
-    print('1 - Initialize DB and create tables structure')
-    print('2 - Generate dictionaries')
-    print('Choose option and press Enter: ')
+    log.info('1 - Initialize DB and create tables structure')
+    log.info('2 - Generate dictionaries')
+    log.info('Choose option and press Enter: ')
     user_option = input()
 
     if user_option == '1':
@@ -50,5 +54,5 @@ def run(config_dta):
         init_dict.create_domain_dta(db, tbl_names, tld)
 
     else:
-        print('Incorrect option picked')
+        log.info('Incorrect option picked')
         return

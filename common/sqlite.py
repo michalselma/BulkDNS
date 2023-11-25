@@ -1,13 +1,17 @@
 # Package: common
 # Module: sqlite
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-19
+# Rev: 2023-11-25 
 
 # sqlite3.connect.autocommit = True is extremely inefficient for executemany() function
 # using sqlite3.connect.commit() after executemany() instead
 
 import os
 import sqlite3
+
+from common import logger
+
+log = logger.log_run()
 
 
 class DB:
@@ -25,10 +29,10 @@ class DB:
             # Establish connection (if db does not exist, con will automatically create it (file physical location))
             with sqlite3.connect(database=db_file):
                 # print(f'{call_id} | DB connection successful')
-                print(f'{call_id} | Database "{self.db_name}" auto-created successfully or exists in {db_file}')
-                print(f'{call_id} | Database version: {sqlite3.sqlite_version}')
+                log.debug(f'{call_id} | Database "{self.db_name}" auto-created successfully or exists in {db_file}')
+                log.debug(f'{call_id} | Database version: {sqlite3.sqlite_version}')
         except sqlite3.Error as err:
-            print(f'{call_id} | DB error: {err}')
+            log.error(f'{call_id} | DB error: {err}')
             raise err
 
     # For mass iteration and inserts -> cur.execute() is inefficient. Use cur.executemany()
@@ -45,10 +49,10 @@ class DB:
                 # Return all rows
                 res = cur.fetchall()
                 cur.close()
-                print(f'{call_id} | DB execute successful')
+                log.debug(f'{call_id} | DB execute successful')
             return res
         except sqlite3.Error as err:
-            print(f'{call_id} | DB error: {err}')
+            log.error(f'{call_id} | DB error: {err}')
 
     def execute_many_param(self, param_query, params_array, call_id):
         # In sqlite database is its physical file location (preferred dynamically calculated absolute path)
@@ -61,10 +65,10 @@ class DB:
                 # Return all rows
                 res = cur.fetchall()
                 cur.close()
-                # print(f'{call_id} | DB execute successful')
+                log.debug(f'{call_id} | DB execute successful')
             return res
         except sqlite3.Error as err:
-            print(f'{call_id} | DB error: {err}')
+            log.error(f'{call_id} | DB error: {err}')
 
     def execute_single_param(self, param_query, params, call_id):
         # In sqlite database is its physical file location (preferred dynamically calculated absolute path)
@@ -77,7 +81,7 @@ class DB:
                 # Return all rows
                 res = cur.fetchall()
                 cur.close()
-                # print(f'{call_id} | DB execute successful')
+                log.debug(f'{call_id} | DB execute successful')
             return res
         except sqlite3.Error as err:
-            print(f'{call_id} | DB error: {err}')
+            log.error(f'{call_id} | DB error: {err}')

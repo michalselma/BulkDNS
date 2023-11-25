@@ -1,14 +1,18 @@
 # Package: BulkDNS
 # Module: init/init_dict
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-19
+# Rev: 2023-11-25
 
 import itertools
 import time
 
+from common import logger
+
+log = logger.log_run()
+
 
 def gen_two_digit():
-    # print(f'Execute: gen_two_digit()')
+    log.debug(f'Execute: gen_two_digit()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     # itertools.product is ~10-30% faster
     # ret = [(a+b) for a in digits for b in digits]
@@ -18,7 +22,7 @@ def gen_two_digit():
 
 
 def gen_two_letter():
-    # print(f'Execute: gen_two_letter()')
+    log.debug(f'Execute: gen_two_letter()')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     # itertools.product is ~10-30% faster
     # ret = [(a+b) for a in letters for b in letters]
@@ -28,7 +32,7 @@ def gen_two_letter():
 
 
 def gen_two_digit_letter():
-    # print('Execute: gen_two_digit_letter()')
+    log.debug('Execute: gen_two_digit_letter()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     ret = itertools.chain(itertools.product(digits, letters), itertools.product(letters, digits))
@@ -39,7 +43,7 @@ def gen_two_digit_letter():
 # two_special will be always empty as "-" is not allowed as domain prefix or suffix and there are no more special chars
 
 def gen_three_digit():
-    # print(f'Execute: gen_three_digit()')
+    log.debug(f'Execute: gen_three_digit()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c) for a in digits for b in digits for c in digits]
@@ -49,7 +53,7 @@ def gen_three_digit():
 
 
 def gen_three_letter():
-    # print(f'Execute: gen_three_letter()')
+    log.debug(f'Execute: gen_three_letter()')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c) for a in letters for b in letters for c in letters]
@@ -59,7 +63,7 @@ def gen_three_letter():
 
 
 def gen_three_digit_letter():
-    # print('Execute: gen_three_digit_letter()')
+    log.debug('Execute: gen_three_digit_letter()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     all_comb = digits + letters
@@ -75,7 +79,7 @@ def gen_three_digit_letter():
 
 
 def gen_three_special():
-    # print('Execute: gen_three_special()')
+    log.debug('Execute: gen_three_special()')
     specials = ('-',)
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
@@ -95,7 +99,7 @@ def gen_three_special():
 
 
 def gen_four_digit():
-    # print(f'Execute: gen_four_digit()')
+    log.debug(f'Execute: gen_four_digit()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c + d) for a in digits for b in digits for c in digits for d in digits]
@@ -105,7 +109,7 @@ def gen_four_digit():
 
 
 def gen_four_letter():
-    # print(f'Execute: gen_four_letter()')
+    log.debug(f'Execute: gen_four_letter()')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c + d) for a in letters for b in letters for c in letters for d in letters]
@@ -115,7 +119,7 @@ def gen_four_letter():
 
 
 def gen_four_digit_letter():
-    # print('Execute: gen_four_digit_letter()')
+    log.debug('Execute: gen_four_digit_letter()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     all_comb = digits + letters
@@ -131,7 +135,7 @@ def gen_four_digit_letter():
 
 
 def gen_four_special():
-    # print('Execute: gen_four_special()')
+    log.debug('Execute: gen_four_special()')
     specials = ('-',)
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
@@ -151,7 +155,7 @@ def gen_four_special():
 
 
 def gen_five_digit():
-    # print(f'Execute: gen_five_digit()')
+    log.debug(f'Execute: gen_five_digit()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c + d + e) for a in digits for b in digits for c in digits for d in digits for e in digits]
@@ -161,7 +165,7 @@ def gen_five_digit():
 
 
 def gen_five_letter():
-    # print(f'Execute: gen_five_letter()')
+    log.debug(f'Execute: gen_five_letter()')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     # itertools.product is ~10-30% faster
     # ret = [(a + b + c + d + e) for a in letters for b in letters for c in letters for d in letters for e in letters]
@@ -171,7 +175,7 @@ def gen_five_letter():
 
 
 def gen_five_digit_letter():
-    # print('Execute: gen_five_digit_letter()')
+    log.debug('Execute: gen_five_digit_letter()')
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
     all_comb = digits + letters
@@ -187,7 +191,7 @@ def gen_five_digit_letter():
 
 
 def gen_five_special():
-    # print('Execute: gen_five_special()')
+    log.debug('Execute: gen_five_special()')
     specials = ('-',)
     digits = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
@@ -210,7 +214,7 @@ def create_domain_dta(db, tbl_names, tld):
     names = None
     # for each table name from tables array defined above
     for tbl_name in tbl_names:
-        print(f'Processing {tbl_name}')
+        log.info(f'Processing {tbl_name}')
         # Generate combinations(names) based on exact table name it should belong to.
         if tbl_name == 'two_digit':
             names = gen_two_digit()
@@ -245,24 +249,24 @@ def create_domain_dta(db, tbl_names, tld):
 
         # If for any reason, generated names are None or empty, skip to next item
         if not names:
-            print(f'No combinations generated. Skipping...')
+            log.warning(f'No combinations generated. Skipping...')
             continue
 
         # Collect names that already exist in db
         table = f'{tbl_name}_{tld}'
-        print(f'Checking DB items in {table}')
+        log.debug(f'Checking DB items in {table}')
         query = f'SELECT name FROM {table}'
         call_id = f'{table} | SELECT'
         output = db.execute_single(query, call_id)
 
         # Compare if all items that exist in db equals all generated items
         if len(output) == len(names):
-            print(f'All generated names for {tbl_name} already exist in {table} table')
+            log.info(f'All generated names for {tbl_name} already exist in {table} table')
             continue  # Skip further processing for this table
         else:
             # Prepare data for mass insert
             sql_params_array = []
-            print(f'Preparing {tbl_name} data...')
+            log.info(f'Preparing {tbl_name} data...')
             to_process_len = len(names)
             counter = 0
             result_set = set(output)  # Convert list to a set as search in list is much slower than search in set
@@ -271,7 +275,7 @@ def create_domain_dta(db, tbl_names, tld):
 
                 # If last item print with /n
                 if counter == to_process_len:
-                    print(f'{counter} of {to_process_len}')
+                    log.info(f'{counter} of {to_process_len}')
                 else:
                     # It is not crucial that complete print count is displayed each time (on each counter),
                     # so we can flush print buffer immediately and gain some free resources or processing time
@@ -288,7 +292,7 @@ def create_domain_dta(db, tbl_names, tld):
                     sql_params_array.append([domain, name, tld, None, None, None])
 
             # When params array prepared for exact table, execute
-            print(f'Data preparation finished. Executing insert into {table}')
+            log.debug(f'Data preparation finished. Executing insert into {table}')
             call_id = f'{table} | INSERT'
             if db.db_type == 'sqlite':
                 sql_param_query = f'INSERT INTO {table} VALUES(?,?,?,?,?,?)'
@@ -297,8 +301,8 @@ def create_domain_dta(db, tbl_names, tld):
                 sql_param_query = f'INSERT INTO {table} VALUES(%s,%s,%s,%s,%s,%s)'
                 db.execute_many_param(sql_param_query, sql_params_array, call_id)
             else:
-                print(f'Error: Incorrect database type. (Should not see me!)')
+                log.critical(f'Error: Incorrect database type. (Should not see me!)')
                 return
 
     timer_stop = time.perf_counter()
-    print(f'Execution time [seconds]: {timer_stop - timer_start}')
+    log.debug(f'Execution time [seconds]: {timer_stop - timer_start}')

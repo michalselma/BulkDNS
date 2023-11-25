@@ -1,7 +1,12 @@
 # Package: BulkDNS
 # Module: init/init_db
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-19
+# Rev: 2023-11-25
+
+from common import logger
+
+log = logger.log_run()
+
 
 def create_db(db, new_db_name):
     call_id = f'{new_db_name} | CREATE DB'
@@ -14,7 +19,7 @@ def create_db(db, new_db_name):
         # For postgresql connect to system table (defined in db object) and call create_new_db with new_db_name param.
         db.create_new_db(new_db_name, call_id)
     else:
-        print(f'Error: Incorrect database type. (Should not see me!)')
+        log.critical(f'Error: Incorrect database type. (Should not see me!)')
 
 
 def create_domain_tbl(db, tbl_names, tld):
@@ -29,13 +34,19 @@ def create_domain_tbl(db, tbl_names, tld):
 def initialize(db, tbl_names, tld):
     # Main operations database for char combinations, taken domains to be moved then to '_taken' db in separate process
     new_db_name = 'domain'
+    log.info(f'Creating database: {new_db_name}')
     create_db(db, new_db_name)
     db.db_name = new_db_name  # When new db has been created, for tables initialization modify db object to use new db
+    log.info(f'Creating tables structure...')
     create_domain_tbl(db, tbl_names, tld)
 
     # Below is to store domains that are taken. Archive and bring back if needed based on domain status change to
     # be managed by archiver module.
     new_db_name = 'domain_taken'
+    log.info(f'Creating database: {new_db_name}')
     create_db(db, new_db_name)
     db.db_name = new_db_name  # When new db is created, for tables initialization modify db object to use new db
+    log.info(f'Creating tables structure...')
     create_domain_tbl(db, tbl_names, tld)
+
+    log.info(f'Finished')

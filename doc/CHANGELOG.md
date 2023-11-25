@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3
+* logger module introduction
+* code adjustments to utilize log functionality
+
 ## 0.2
 * database structure initialization module
 * common libraries module (DB SQL modules)

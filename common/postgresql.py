@@ -1,7 +1,7 @@
 # Package: common
 # Module: postgresql
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-19
+# Rev: 2023-11-25
 
 # TO DO con.autocommit = True - to check efficiency as in sqlite it almost kills processing
 # Probably should be .autocommit = False
@@ -36,6 +36,10 @@
 import psycopg
 import time
 
+from common import logger
+
+log = logger.log_run()
+
 
 class DB:
     def __init__(self, db_type, db_name, db_host, db_port, db_user, db_password, db_retry):
@@ -56,10 +60,9 @@ class DB:
                     query = f'CREATE database {db_name}'
                     cur.execute(query)
                     res = []
-            print(f'{call_id} | Database "{db_name}" created successfully')
+            log.debug(f'{call_id} | Database "{db_name}" created successfully')
         except psycopg.Error as err:
-            print(f'{call_id} | DB error')
-            print(err)
+            log.error(f'{call_id} | DB error: {err}')
             raise err
         finally:
             return res
@@ -75,16 +78,14 @@ class DB:
                     # res = cur.fetchall() if cur.description else []
                     res = cur.fetchall()
             retry_count = 0
-            # print(f'{call_id} | DB execute successful')
+            log.debug(f'{call_id} | DB execute successful')
         except psycopg.Error as err:
             if retry_count >= self.db_retry:
-                print(f'{call_id} | DB error | No more retry')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | No more retry')
                 raise err
             else:
                 retry_count += 1
-                print(f'{call_id} | DB error | Retrying {retry_count}')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | Retrying {retry_count}')
                 time.sleep(15)
                 self.execute_single(query, call_id, retry_count)
         finally:
@@ -99,16 +100,14 @@ class DB:
                     # otherwise there might be error exception in parent functions.
                     res = cur.fetchall() if cur.description else []
             retry_count = 0
-            # print(f'{call_id} | DB execute successful')
+            log.debug(f'{call_id} | DB execute successful')
         except psycopg.Error as err:
             if retry_count >= self.db_retry:
-                print(f'{call_id} | DB error | No more retry')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | No more retry')
                 raise err
             else:
                 retry_count += 1
-                print(f'{call_id} | DB error | Retrying {retry_count}')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | Retrying {retry_count}')
                 time.sleep(15)
                 self.execute_many_param(param_query, params_array, call_id, retry_count)
         finally:
@@ -123,16 +122,14 @@ class DB:
                     # otherwise there might be error exception in parent functions.
                     res = cur.fetchall() if cur.description else []
             retry_count = 0
-            # print(f'{call_id} | DB execute successful')
+            log.debug(f'{call_id} | DB execute successful')
         except psycopg.Error as err:
             if retry_count >= self.db_retry:
-                print(f'{call_id} | DB error | No more retry')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | No more retry')
                 raise err
             else:
                 retry_count += 1
-                print(f'{call_id} | DB error | Retrying {retry_count}')
-                print(err)
+                log.error(f'{call_id} | DB error: {err} | Retrying {retry_count}')
                 time.sleep(15)
                 self.execute_many_param(param_query, params, call_id, retry_count)
         finally:
