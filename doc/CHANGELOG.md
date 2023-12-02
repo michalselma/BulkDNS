@@ -1,13 +1,19 @@
 # CHANGELOG
 
+## 0.3.1
+* instructions, readme & docs update
+
+
 ## 0.3
 * logger module introduction
 * code adjustments to utilize log functionality
+
 
 ## 0.2
 * database structure initialization module
 * common libraries module (DB SQL modules)
 * configuration
+
 
 ## 0.1 - Initial Release
 * project structure - files & folders 
