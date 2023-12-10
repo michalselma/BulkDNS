@@ -1,11 +1,11 @@
 # Package: BulkDNS
 # Module: init/init_db
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25
+# Rev: 2023-12-10
 
-from common import logger
+import logging
 
-log = logger.log_run()
+log = logging.getLogger('main')
 
 
 def create_db(db, new_db_name):

@@ -1,7 +1,7 @@
 # Package: common
 # Module: postgresql
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25
+# Rev: 2023-12-10
 
 # TO DO con.autocommit = True - to check efficiency as in sqlite it almost kills processing
 # Probably should be .autocommit = False
@@ -35,10 +35,9 @@
 
 import psycopg
 import time
+import logging
 
-from common import logger
-
-log = logger.log_run()
+log = logging.getLogger('main')
 
 
 class DB:

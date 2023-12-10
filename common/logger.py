@@ -1,7 +1,7 @@
 # Package: common
 # Module: logger
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25
+# Rev: 2023-12-10
 
 import sys
 import logging
@@ -10,12 +10,7 @@ from logging.handlers import RotatingFileHandler
 from logging.handlers import TimedRotatingFileHandler
 
 
-def log_configure(logger_name):
-
-    # This will create second file default formatted overwritten on each run
-    logging.basicConfig(level=logging.INFO,
-                        filename='./log/default.log',
-                        filemode='w')
+def configure(logger_name):
 
     # Define console handler
     handler_console = logging.StreamHandler(sys.stdout)
@@ -42,9 +37,4 @@ def log_configure(logger_name):
     # Define global logging level
     logger_name.setLevel(logging.DEBUG)
 
-
-# Call/Create custom logger
-def log_run():
-    logger_name = 'main'
-    log = logging.getLogger(logger_name)
-    return log
+    logger_name.propagate = 0

@@ -1,14 +1,13 @@
 # Package: BulkDNS
 # Module: init/init_dict
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25
+# Rev: 2023-12-10
 
+import logging
 import itertools
 import time
 
-from common import logger
-
-log = logger.log_run()
+log = logging.getLogger('main')
 
 
 def gen_two_digit():

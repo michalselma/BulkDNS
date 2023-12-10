@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.3.2
+* logging fixes & adjustments
+* propagate updated logging code to main, init & common modules
+
+
 ## 0.3.1
 * instructions, readme & docs update
 

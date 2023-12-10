@@ -1,17 +1,16 @@
 # Package: common
 # Module: sqlite
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25 
+# Rev: 2023-12-10
 
 # sqlite3.connect.autocommit = True is extremely inefficient for executemany() function
 # using sqlite3.connect.commit() after executemany() instead
 
 import os
 import sqlite3
+import logging
 
-from common import logger
-
-log = logger.log_run()
+log = logging.getLogger('main')
 
 
 class DB:

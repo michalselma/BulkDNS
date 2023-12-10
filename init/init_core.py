@@ -1,16 +1,16 @@
 # Package: BulkDNS
 # Module: init/init_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-11-25
+# Rev: 2023-12-10
+
+import logging
 
 from init import init_db
 from init import init_dict
 from common import sqlite
 from common import postgresql
 
-from common import logger
-
-log = logger.log_run()
+log = logging.getLogger('main')
 
 
 def run(config_dta):
