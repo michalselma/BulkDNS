@@ -1,14 +1,13 @@
 # Package: BulkDNS
-# Module: init/init_core
+# Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
 # Rev: 2023-12-15
 
 import logging
 
-from init import init_db
-from init import init_dict
 from common import sqlite
 from common import postgresql
+from core import single_proc
 
 log = logging.getLogger('main')
 
@@ -38,8 +37,9 @@ def run(config_dta):
         log.critical(f'Error: Incorrect database type')
         return
 
-    log.info('1 - Initialize DB and create tables structure')
-    log.info('2 - Generate dictionaries')
+    print('1 - Check domains one-by-one [single processing]')
+    print('2 - Check domains [multiprocessing]')
+    print('3 - Check domains [multithreading]')
     log.info('Choose option and press Enter: ')
     user_option = input()
 
@@ -47,11 +47,12 @@ def run(config_dta):
         # DB initialization and top level domain tables create
         sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type above
         db.dbname = sys_db  # Override default dbname with system db name, as default may not yet exist in DB
-        init_db.initialize(db, tbl_names, tld)
-
+        single_proc.run_domain_check_by_table(db, tbl_names, tld)
     elif user_option == '2':
-        # Generate char-based domain dictionaries (one, two, three, four and five char combinations)
-        init_dict.create_domain_dta(db, tbl_names, tld)
+        log.info('Not implemented yet...')
+
+    elif user_option == '3':
+        log.info('Not implemented yet...')
 
     else:
         log.info('Incorrect option picked')

@@ -1,7 +1,7 @@
 # Package: common
 # Module: postgresql
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-10
+# Rev: 2023-12-15
 
 # TO DO con.autocommit = True - to check efficiency as in sqlite it almost kills processing
 # Probably should be .autocommit = False
@@ -48,7 +48,7 @@ class DB:
         self.db_port = db_port
         self.db_user = db_user
         self.db_password = db_password
-        self.db_retry = db_retry
+        self.db_retry = int(db_retry)
 
     def create_new_db(self, db_name, call_id):
         try:

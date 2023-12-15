@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.4
+* check domains functionality added - single processing within core module
+* minor or cosmetic adjustments to postgresql, logger, init_core and main modules
+
+
 ## 0.3.2
 * logging fixes & adjustments
 * propagate updated logging code to main, init & common modules

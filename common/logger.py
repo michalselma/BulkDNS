@@ -1,7 +1,7 @@
 # Package: common
 # Module: logger
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-10
+# Rev: 2023-12-15
 
 import sys
 import logging
@@ -10,7 +10,7 @@ from logging.handlers import RotatingFileHandler
 from logging.handlers import TimedRotatingFileHandler
 
 
-def configure(logger_name):
+def configure(logger_name, log_level):
 
     # Define console handler
     handler_console = logging.StreamHandler(sys.stdout)
@@ -35,6 +35,10 @@ def configure(logger_name):
     logger_name.addHandler(handler_file)
 
     # Define global logging level
-    logger_name.setLevel(logging.DEBUG)
+
+    if log_level == 'DEBUG':
+        logger_name.setLevel(logging.DEBUG)
+    else:
+        logger_name.setLevel(logging.INFO)
 
     logger_name.propagate = 0
