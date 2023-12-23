@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.5
+* archiving and backup functionality
+* fixes to postgresql module and processing module 
+
+
 ## 0.4
 * check domains functionality added - single processing within core module
 * minor or cosmetic adjustments to postgresql, logger, init_core and main modules

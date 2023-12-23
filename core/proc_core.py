@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-15
+# Rev: 2023-12-23
 
 import logging
 
@@ -37,9 +37,9 @@ def run(config_dta):
         log.critical(f'Error: Incorrect database type')
         return
 
-    print('1 - Check domains one-by-one [single processing]')
-    print('2 - Check domains [multiprocessing]')
-    print('3 - Check domains [multithreading]')
+    log.info('1 - Check domains one-by-one [single processing]')
+    log.info('2 - Check domains [multiprocessing]')
+    log.info('3 - Check domains [multithreading]')
     log.info('Choose option and press Enter: ')
     user_option = input()
 

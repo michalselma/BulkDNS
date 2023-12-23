@@ -3,7 +3,7 @@
 ## Bugs
 
 * Very high memory consumption (>16 GB) for five_digit_letter names generator.
-Problem is not during names itself generation, but at stage of SQL insert data preparation.
+Problem is not during names itself generation, but at stage of SQL insert data perpartion.
 Possible fix to change the logic of create_domain_dta() to execute insert every 1-2M records during data preparation, not afterwards. 
 
 

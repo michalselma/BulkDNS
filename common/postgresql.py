@@ -1,7 +1,7 @@
 # Package: common
 # Module: postgresql
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-15
+# Rev: 2023-12-23
 
 # TO DO con.autocommit = True - to check efficiency as in sqlite it almost kills processing
 # Probably should be .autocommit = False
@@ -74,8 +74,7 @@ class DB:
                     cur.execute(query)
                     # Validate result by checking existence of cursor description,
                     # otherwise there might be error exception in parent functions.
-                    # res = cur.fetchall() if cur.description else []
-                    res = cur.fetchall()
+                    res = cur.fetchall() if cur.description else []
             retry_count = 0
             log.debug(f'{call_id} | DB execute successful')
         except psycopg.Error as err:

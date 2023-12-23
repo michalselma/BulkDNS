@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: main
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-15
+# Rev: 2023-12-23
 
 import os
 import sys
@@ -10,6 +10,7 @@ import logging
 
 from init import init_core
 from core import proc_core
+from arch import arch_core
 
 from common import logger
 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
 
     log.info('1 - System initialization')
     log.info('2 - Domains check')
-    log.info('3 - Archiving')
+    log.info('3 - Archiving & backup')
     log.info('Choose option and press Enter: ')
     user_option = input()
     if user_option == '1':
@@ -36,6 +37,6 @@ if __name__ == '__main__':
     elif user_option == '2':
         proc_core.run(config)
     elif user_option == '3':
-        log.info('Not implemented yet...')
+        arch_core.run(config)
     else:
         log.info('Incorrect option picked')

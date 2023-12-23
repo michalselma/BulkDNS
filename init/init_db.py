@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: init/init_db
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-10
+# Rev: 2023-12-23
 
 import logging
 
@@ -43,6 +43,14 @@ def initialize(db, tbl_names, tld):
     # Below is to store domains that are taken. Archive and bring back if needed based on domain status change to
     # be managed by archiver module.
     new_db_name = 'domain_taken'
+    log.info(f'Creating database: {new_db_name}')
+    create_db(db, new_db_name)
+    db.db_name = new_db_name  # When new db is created, for tables initialization modify db object to use new db
+    log.info(f'Creating tables structure...')
+    create_domain_tbl(db, tbl_names, tld)
+
+    # Below is backup DB. Data backup is managed by archiver module.
+    new_db_name = 'domain_backup'
     log.info(f'Creating database: {new_db_name}')
     create_db(db, new_db_name)
     db.db_name = new_db_name  # When new db is created, for tables initialization modify db object to use new db
