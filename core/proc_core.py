@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-23
+# Rev: 2023-12-29
 
 import logging
 
@@ -37,17 +37,15 @@ def run(config_dta):
         log.critical(f'Error: Incorrect database type')
         return
 
-    log.info('1 - Check domains one-by-one [single processing]')
+    log.info('1 - Check domains [single processing]')
     log.info('2 - Check domains [multiprocessing]')
     log.info('3 - Check domains [multithreading]')
     log.info('Choose option and press Enter: ')
     user_option = input()
 
     if user_option == '1':
-        # DB initialization and top level domain tables create
-        sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type above
-        db.dbname = sys_db  # Override default dbname with system db name, as default may not yet exist in DB
-        single_proc.run_domain_check_by_table(db, tbl_names, tld)
+        single_proc.single_process_run(db, tbl_names, tld)
+
     elif user_option == '2':
         log.info('Not implemented yet...')
 

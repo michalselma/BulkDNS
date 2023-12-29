@@ -1,8 +1,12 @@
 # CHANGELOG
 
+## 0.5.1
+* fixes & adjustments in single processing module and proc_core
+
+
 ## 0.5
 * archiving and backup functionality
-* fixes to postgresql module and processing module 
+* fixes to postgresql module and processing/core module 
 
 
 ## 0.4
