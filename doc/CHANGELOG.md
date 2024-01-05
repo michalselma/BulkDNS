@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.6
+* multiprocessing implementation for domains check functionality
+
+
 ## 0.5.1
 * fixes & adjustments in single processing module and proc_core
 
@@ -37,3 +41,4 @@
 ## 0.1 - Initial Release
 * project structure - files & folders 
 * docs, license, info etc.
+
