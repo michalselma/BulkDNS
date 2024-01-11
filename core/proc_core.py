@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-05
+# Rev: 2024-01-11
 
 import logging
 
@@ -9,6 +9,7 @@ from common import sqlite
 from common import postgresql
 from core import single_proc
 from core import multi_proc
+from core import multi_thread
 
 log = logging.getLogger('main')
 
@@ -51,7 +52,7 @@ def run(config_dta):
         multi_proc.multiprocess_run(db, tbl_names, tld)
 
     elif user_option == '3':
-        log.info('Not implemented yet...')
+        multi_thread.multithreading_run(db, tbl_names, tld)
 
     else:
         log.info('Incorrect option picked')

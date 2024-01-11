@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.7
+* multithreading implementation for domains check functionality
+
+
 ## 0.6
 * multiprocessing implementation for domains check functionality
 

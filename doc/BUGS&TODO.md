@@ -14,6 +14,9 @@ Something to rebuild with while -> count -> try/except structure.
 
 * There is memory leak in whoisdomain package -> See https://github.com/mboot-github/WhoisDomain/issues/30
 
+
+* Keyboard interrupt for multithreading not working
+
 ## To-Do list
 
 * Before whois processing starts add verification if whois binary is installed, otherwise application will try to process checks (not harmful as result of check will raise error '-1' and no update on each checked domain will be done). Still whole processing is unneeded and there is no indication that something is wrong)
