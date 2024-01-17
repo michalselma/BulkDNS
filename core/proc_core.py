@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-11
+# Rev: 2024-01-17
 
 import logging
 
@@ -28,7 +28,7 @@ def run(config_dta):
         cfg_db = config_dta['DB.sqlite']
         db_path = cfg_db['db_location']
         db = sqlite.DB(db_type, db_path, db_name, db_retry_limit)
-    elif db_type == 'postgres':
+    elif db_type == 'postgresql':
         cfg_db = config_dta['DB.postgres']
         db_host = cfg_db['db_host']
         db_port = cfg_db['db_port']

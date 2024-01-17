@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.7.1
+* init_core, proc_core and arch_core fixed to properly match db_type var for postgresql
+* default config updated to use 'postgresql' identifier instead of 'postgres'
+
+
 ## 0.7
 * multithreading implementation for domains check functionality
 
