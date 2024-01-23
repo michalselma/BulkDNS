@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/single_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-29
+# Rev: 2024-01-23
 
 import logging
 
@@ -14,7 +14,7 @@ log = logging.getLogger('main')
 # and single param query to update checked domains in that table one by one
 def single_process_run(db, tbl_names, tld):
 
-    log.debug(f'Building domain check tasks (grouping to be processed data)')
+    log.info(f'Preparing params data...')
     tasks = domain_ops.params_preparation(db, tbl_names, tld)
     worker_id = '0'
 

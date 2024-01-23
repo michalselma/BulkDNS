@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/domain_ops
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-29
+# Rev: 2024-01-23
 
 import datetime
 import logging
@@ -56,10 +56,10 @@ def params_preparation(db, tbl_names, tld):
 
         else:
             sql_select = (f"SELECT DISTINCT substr(name, 1, 4) FROM {table} WHERE updated is null OR "
-                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') ORDER BY substr(name, 1, 3)")
+                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') ORDER BY substr(name, 1, 4)")
             result = db.execute_single(sql_select, call_id)
 
-        if result is [] or None:
+        if result is []:
             continue
         else:
             for param in result:
@@ -90,7 +90,7 @@ def run_domain_check_param(db, table, param, worker_id):
     if items_amount == 0:
         log.info(f'No {param} items to process in {table}.')
         return  # Stop processing
-    log.debug(f'Worker {worker_id} |{param} {table} | Items to process {items_amount}')
+    log.debug(f'Worker {worker_id} | {param} {table} | Items to process {items_amount}')
     print(f'Worker \033[95m{worker_id:>3}\033[00m \033[94m|\033[00m \033[93m{param}\033[00m {table} \033[94m|\033[00m Items to process \033[91m{items_amount}\033[00m')
 
     # Define variables

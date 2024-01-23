@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_thread
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-11
+# Rev: 2024-01-23
 
 
 import concurrent.futures
@@ -43,7 +43,7 @@ def create_threads(thread_limit, tasks):
                 res = future.result()  # This is return value as result of job done by worker for task[2]
                 # pass
             except Exception as ex:
-                log.error(f'Error. {worker_object} generated an exception: {ex}')
+                log.error(f'{worker_object} | Exception: {ex}')
             else:
                 log.debug(f'Task {worker_object} finished and returned: {res}')
                 # pass

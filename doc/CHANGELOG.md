@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.7.2
+* Fix of retry function in postgresql module, causing exceptional break of multithread processing, due to UnboundLocalError: cannot access local variable where it is not associated with a value. 
+* Minor cosmetic changes in core modules
+
+
 ## 0.7.1
 * init_core, proc_core and arch_core fixed to properly match db_type var for postgresql
 * default config updated to use 'postgresql' identifier instead of 'postgres'

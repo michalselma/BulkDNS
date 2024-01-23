@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-05
+# Rev: 2024-01-23
 
 import multiprocessing
 import signal
@@ -9,6 +9,7 @@ import time
 import logging
 
 from core import domain_ops
+
 
 log = logging.getLogger('main')
 
@@ -40,6 +41,8 @@ def multiprocess_run(db, tbl_names, tld):
     processes_limit = cpu  # Set the maximum number of parallel processes
     process_clean = 50  # Restart process every x tasks executed, to free up reserved and abandon OS resources.
     log.info(f'Available CPU: {cpu} | Parallel process to be executed: {processes_limit}')
+
+    log.info(f'Preparing params data...')
     tasks = domain_ops.params_preparation(db, tbl_names, tld)
 
     # Start processing

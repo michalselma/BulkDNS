@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: arch/arch_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-17
+# Rev: 2024-01-23
 
 import logging
 
@@ -22,7 +22,8 @@ def run(config_dta):
     db_arch_name = config_dta['DEFAULT']['db_arch_name']
     db_backup_type = config_dta['DEFAULT']['db_backup_type']
     db_backup_name = config_dta['DEFAULT']['db_backup_name']
-    db_retry_limit = config_dta['DEFAULT']['db_retry_limit']
+    db_retry_limit = int(config_dta['DEFAULT']['db_retry_limit'])
+    db_retry_sleep_time = int(config_dta['DEFAULT']['db_retry_sleep_time'])
 
     # Prepare default db objects
     if db_type == 'sqlite':
@@ -36,8 +37,8 @@ def run(config_dta):
         db_port = cfg_db['db_port']
         user_name = cfg_db['user_name']
         user_password = cfg_db['user_password']
-        db = postgresql.DB(db_type, db_name, db_host, db_port, user_name, user_password, db_retry_limit)
-        db_arch = postgresql.DB(db_type, db_arch_name, db_host, db_port, user_name, user_password, db_retry_limit)
+        db = postgresql.DB(db_type, db_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
+        db_arch = postgresql.DB(db_type, db_arch_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
     else:
         log.critical(f'Error: Incorrect database type')
         return
@@ -66,7 +67,7 @@ def run(config_dta):
             db_port = cfg_db['db_port']
             user_name = cfg_db['user_name']
             user_password = cfg_db['user_password']
-            db_backup = postgresql.DB(db_type, db_backup_name, db_host, db_port, user_name, user_password, db_retry_limit)
+            db_backup = postgresql.DB(db_type, db_backup_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
         else:
             log.critical(f'Error: Incorrect backup database type')
             return
