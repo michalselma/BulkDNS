@@ -27,9 +27,10 @@ Main modules (some are still under development - see roadmap):
     sudo apt upgrade
     sudo apt install whois
     ``` 
-* install dependencies (see below)
+* install rdap binary (follow download and compile instructions on project github page): https://www.openrdap.org/ (https://github.com/openrdap/rdap)
+* install python dependencies (see below)
 * review and modify ```config.cfg``` located in root diectory
-* open cmd terminal or shell & run application: ```python main.py```
+* open cmd terminal/shell & run application: ```python main.py```
 
 
 ## Dependencies

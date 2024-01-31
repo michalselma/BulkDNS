@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-23
+# Rev: 2024-01-31
 
 import logging
 
@@ -40,20 +40,38 @@ def run(config_dta):
         log.critical(f'Error: Incorrect database type')
         return
 
-    log.info('1 - Check domains [single processing]')
-    log.info('2 - Check domains [multiprocessing]')
-    log.info('3 - Check domains [multithreading]')
+    log.info('1 - Check domains RDAP [single processing]')
+    log.info('2 - Check domains WHOIS [single processing]')
+    log.info('3 - Check domains RDAP [multiprocessing]')
+    log.info('4 - Check domains WHOIS [multiprocessing]')
+    log.info('5 - Check domains RDAP [multithreading]')
+    log.info('6 - Check domains WHOIS [multithreading]')
     log.info('Choose option and press Enter: ')
     user_option = input()
 
     if user_option == '1':
-        single_proc.single_process_run(db, tbl_names, tld)
+        protocol='rdap'
+        single_proc.single_process_run(db, tbl_names, tld, protocol)
 
-    elif user_option == '2':
-        multi_proc.multiprocess_run(db, tbl_names, tld)
+    if user_option == '2':
+        protocol='whois'
+        single_proc.single_process_run(db, tbl_names, tld, protocol)
 
     elif user_option == '3':
-        multi_thread.multithreading_run(db, tbl_names, tld)
+        protocol='rdap'
+        multi_proc.multiprocess_run(db, tbl_names, tld, protocol)
+    
+    elif user_option == '4':
+        protocol='whois'
+        multi_proc.multiprocess_run(db, tbl_names, tld, protocol)
+
+    elif user_option == '5':
+        protocol='rdap'
+        multi_thread.multithreading_run(db, tbl_names, tld, protocol)
+
+    elif user_option == '6':
+        protocol='whois'
+        multi_thread.multithreading_run(db, tbl_names, tld, protocol)
 
     else:
         log.info('Incorrect option picked')

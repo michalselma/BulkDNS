@@ -1,14 +1,15 @@
 # Package: BulkDNS
 # Module: core/multi_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-23
+# Rev: 2024-01-31
 
 import multiprocessing
 import signal
 import time
 import logging
+import gc
 
-from core import domain_ops
+from core import domain
 
 
 log = logging.getLogger('main')
@@ -23,10 +24,15 @@ def worker(task):
     db = task[0]
     table = task[1]
     param = task[2]
+    exp_date = task[3]
+    updated_date = task[4]
+    protocol = task[5]
+
     process = multiprocessing.current_process()
     worker_id = process.name[16:]  # Remove 'SpawnPoolWorker-' from thread.name()
+    
     log.debug(f'{process.name} PID {process.pid} | Task: {param} / {table} | START')
-    domain_ops.run_domain_check_param(db, table, param, worker_id)
+    domain.run_domain_check_param(db, table, param, exp_date, updated_date, protocol, worker_id)
     # Below will only kill active tasks but will keep pool open - something to follow up
     # try:
     #     domain_ops.run_domain_check_param(db, table, param, worker_id)
@@ -36,18 +42,19 @@ def worker(task):
     log.debug(f'{process.name} PID {process.pid} | Task: {param} / {table} | END')
 
 
-def multiprocess_run(db, tbl_names, tld):
+def multiprocess_run(db, tbl_names, tld, protocol):
+    gc.enable()  # Enable automatic garbage collection.
     cpu = multiprocessing.cpu_count()
-    processes_limit = cpu  # Set the maximum number of parallel processes
+    processes_limit = 2 * cpu  # Set the maximum number of parallel processes
     process_clean = 50  # Restart process every x tasks executed, to free up reserved and abandon OS resources.
     log.info(f'Available CPU: {cpu} | Parallel process to be executed: {processes_limit}')
 
     log.info(f'Preparing params data...')
-    tasks = domain_ops.params_preparation(db, tbl_names, tld)
+    tasks = domain.params_preparation(db, tbl_names, tld, protocol)
 
     # Start processing
     pool = multiprocessing.Pool(processes_limit, init_worker, maxtasksperchild=process_clean)
-    result = pool.map_async(worker, tasks)
+    result = pool.map_async(worker, tasks, chunksize=1)  # chunksize - batch of params for each worker (group tasks and pass each group to worker)
     try:
         # This loop is to monitor and identify Keyboard interrupt exception
         while not result.ready():

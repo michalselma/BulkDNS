@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_thread
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-23
+# Rev: 2024-01-31
 
 
 import concurrent.futures
@@ -10,7 +10,7 @@ import multiprocessing
 import logging
 import gc
 
-from core import domain_ops
+from core import domain
 
 log = logging.getLogger('main')
 
@@ -19,11 +19,16 @@ def worker(task):
     db = task[0]
     table = task[1]
     param = task[2]
+    exp_date = task[3]
+    updated_date = task[4]
+    protocol = task[5]
+
     thread = threading.current_thread()
     worker_id = thread.name[21:]  # Remove 'ThreadPoolExecutor-0_' from thread.name()
     thread_tid = thread.native_id
+
     log.debug(f'Worker {worker_id} | TID {thread_tid} | Task {param} / {table} | START')
-    domain_ops.run_domain_check_param(db, table, param, worker_id)
+    domain.run_domain_check_param(db, table, param, exp_date, updated_date, protocol, worker_id)
     log.debug(f'Worker {worker_id} | TID {thread_tid} | Task {param} / {table} | END')
     log.debug(f'Garbage Stats: {gc.get_stats()}')
     # collections is the number of times this generation was collected;
@@ -49,12 +54,21 @@ def create_threads(thread_limit, tasks):
                 # pass
 
 
-def multithreading_run(db, tbl_names, tld):
+def multithreading_run(db, tbl_names, tld, protocol):
     gc.enable()  # Enable automatic garbage collection.
+    
     cpu = int(multiprocessing.cpu_count())
-    thread_limit = 12 * cpu  # Set your desired thread limit
+
+    if protocol == 'rdap':
+        thread_limit = 2 * cpu  # Set your desired thread limit
+    elif protocol == 'whois':
+        thread_limit = 12 * cpu  # Set your desired thread limit
+    else:
+        log.error (f'Unidentified domain check protocol: {protocol}')        
+        return
+
     log.info(f'Available CPU: {cpu} | Parallel threads to be executed: {thread_limit}')
     log.info(f'Preparing params data...')
-    tasks = domain_ops.params_preparation(db, tbl_names, tld)
+    tasks = domain.params_preparation(db, tbl_names, tld, protocol)
     log.info(f'Creating threads...')
     create_threads(thread_limit, tasks)
