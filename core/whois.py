@@ -35,6 +35,7 @@ def get_domain_raw_data(name, tld):
     except whoisdomain.exceptions.WhoisCommandTimeout as e:
         print(f'{domain} | Exception WhoisCommandTimeout: {e}')
 
+
 def get_domain_data(name, tld, retry):
     domain = f'{name}.{tld}'
 

@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_thread
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-31
+# Rev: 2024-02-05
 
 
 import concurrent.futures
@@ -28,7 +28,15 @@ def worker(task):
     thread_tid = thread.native_id
 
     log.debug(f'Worker {worker_id} | TID {thread_tid} | Task {param} / {table} | START')
-    domain.run_domain_check_param(db, table, param, exp_date, updated_date, protocol, worker_id)
+
+    if protocol == 'rdap':
+        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id)
+    elif protocol == 'whois':
+        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id)
+    else:
+        log.error(f'Unidentified protocol: {protocol}')
+        return
+
     log.debug(f'Worker {worker_id} | TID {thread_tid} | Task {param} / {table} | END')
     log.debug(f'Garbage Stats: {gc.get_stats()}')
     # collections is the number of times this generation was collected;

@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-31
+# Rev: 2024-02-05
 
 import multiprocessing
 import signal
@@ -32,7 +32,15 @@ def worker(task):
     worker_id = process.name[16:]  # Remove 'SpawnPoolWorker-' from thread.name()
     
     log.debug(f'{process.name} PID {process.pid} | Task: {param} / {table} | START')
-    domain.run_domain_check_param(db, table, param, exp_date, updated_date, protocol, worker_id)
+
+    if protocol == 'rdap':
+        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id)
+    elif protocol == 'whois':
+        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id)
+    else:
+        log.error(f'Unidentified protocol: {protocol}')
+        return
+
     # Below will only kill active tasks but will keep pool open - something to follow up
     # try:
     #     domain_ops.run_domain_check_param(db, table, param, worker_id)
@@ -44,11 +52,12 @@ def worker(task):
 
 def multiprocess_run(db, tbl_names, tld, protocol):
     gc.enable()  # Enable automatic garbage collection.
+
     cpu = multiprocessing.cpu_count()
     processes_limit = 2 * cpu  # Set the maximum number of parallel processes
     process_clean = 50  # Restart process every x tasks executed, to free up reserved and abandon OS resources.
-    log.info(f'Available CPU: {cpu} | Parallel process to be executed: {processes_limit}')
 
+    log.info(f'Available CPU: {cpu} | Parallel process to be executed: {processes_limit}')
     log.info(f'Preparing params data...')
     tasks = domain.params_preparation(db, tbl_names, tld, protocol)
 

@@ -1,8 +1,14 @@
 # CHANGELOG
 
+
+## 0.8.1
+* domain module improvements and rebuild
+
+
 ## 0.8
 * RDAP functionality introduction
 * WHOIS module rebuild, minor cosmetic changes to other modules
+
 
 ## 0.7.2
 * Fix of retry function in postgresql module, causing exceptional break of multithread processing, due to UnboundLocalError: cannot access local variable where it is not associated with a value. 

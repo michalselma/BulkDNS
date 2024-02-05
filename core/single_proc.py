@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/single_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-31
+# Rev: 2024-02-05
 
 import logging
 
@@ -28,4 +28,10 @@ def single_process_run(db, tbl_names, tld, protocol):
         protocol = task[5]
         
         log.info(f'Checking {table} | {param}')
-        domain.run_domain_check_param(db, table, param, exp_date, updated_date, protocol, worker_id)
+        if protocol == 'rdap':
+            domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id)
+        elif protocol == 'whois':
+            domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id)
+        else:
+            log.error(f'Unidentified protocol: {protocol}')
+            return
