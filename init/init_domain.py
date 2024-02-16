@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: init/init_dict
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2023-12-10
+# Rev: 2024-02-16
 
 import logging
 import itertools

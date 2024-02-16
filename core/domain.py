@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/domain_ops
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-05
+# Rev: 2024-02-16
 
 import datetime
 import logging
@@ -11,13 +11,12 @@ from core import whois
 
 log = logging.getLogger('main')
 
-tbl_names_none = ['two_digit', 'two_letter', 'two_digit_letter']
-tbl_names_short = ['three_digit', 'three_letter', 'three_special']
-tbl_names_medium = ['three_digit_letter', 'four_digit', 'four_letter', 'four_digit_letter', 'four_special']
-tbl_names_large = ['five_digit', 'five_letter', 'five_digit_letter', 'five_special']
+tbl_names_none_param = ['two_digit', 'two_letter', 'two_digit_letter']
+tbl_names_short_param = ['three_digit', 'three_letter', 'three_special']
+tbl_names_medium_param = ['three_digit_letter', 'four_digit', 'four_letter', 'four_digit_letter', 'four_special']
 
 
-def params_preparation(db, tbl_names, tld, protocol):
+def params_preparation(db, tbl_names, tld, check_type, protocol):
     params_to_process = []
     for tbl_name in tbl_names:
         table = f'{tbl_name}_{tld}'
@@ -29,43 +28,28 @@ def params_preparation(db, tbl_names, tld, protocol):
         updated_date = datetime.datetime.now() - datetime.timedelta(days=7)
         updated_date = datetime.datetime(updated_date.year, updated_date.month, updated_date.day, 0, 0, 0)
 
-        if tbl_name in tbl_names_none:
-            # Check if there are any items to be processed in tbl_names_none tables. As no substring is used here using
-            # count(*) and overriding result/param type ([] to identify nothing to process and [(None,)] to pass 'None'
-            # param for further processing of whole table instead of param/table
-            sql_select = f"SELECT count(*) FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}')"
-            result = db.execute_single(sql_select, call_id)
-            if result[0][0] == 0:
-                result = []
-            else:
-                result = [(None,)]
-
-        elif tbl_name in tbl_names_short:
-            sql_select = (f"SELECT DISTINCT substr(name, 1, 1), COUNT(*) FROM {table} WHERE updated is null OR "
-                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') GROUP BY substr(name, 1, 1) ORDER BY count(*), substr(name, 1, 1)")
-            result = db.execute_single(sql_select, call_id)
-
-        elif tbl_name in tbl_names_medium:
-            sql_select = (f"SELECT DISTINCT substr(name, 1, 2), COUNT(*) FROM {table} WHERE updated is null OR "
-                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') GROUP BY substr(name, 1, 2) ORDER BY count(*), substr(name, 1, 2)")
-            result = db.execute_single(sql_select, call_id)
-
-        elif tbl_name in tbl_names_large:
-            sql_select = (f"SELECT DISTINCT substr(name, 1, 3), COUNT(*) FROM {table} WHERE updated is null OR "
-                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') GROUP BY substr(name, 1, 3) ORDER BY count(*), substr(name, 1, 3)")
-            result = db.execute_single(sql_select, call_id)
-
+        if tbl_name in tbl_names_none_param:
+            substr = 'substr(name, 1, 0)'
+        elif tbl_name in tbl_names_short_param:
+            substr = 'substr(name, 1, 1)'
+        elif tbl_name in tbl_names_medium_param:
+            substr = 'substr(name, 1, 2)'
         else:
-            sql_select = (f"SELECT DISTINCT substr(name, 1, 4), COUNT(*) FROM {table} WHERE updated is null OR "
-                          f"(expiry<='{exp_date}' AND updated<='{updated_date}') GROUP BY substr(name, 1, 4) ORDER BY count(*), substr(name, 1, 4)")
-            result = db.execute_single(sql_select, call_id)
+            substr = 'substr(name, 1, 3)'
+
+        # Expiring domains check or available domains re-check will be executed only for domains with last check earlier than 7 days ago
+        if check_type == 'expiring':
+            sql_select = (f"SELECT DISTINCT {substr}, count(*) FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}') GROUP BY {substr} ORDER BY count(*), {substr}")
+        else:  # This covers check_type == 'recheck'
+            sql_select = (f"SELECT DISTINCT {substr}, count(*) FROM {table} WHERE avail='Y' AND updated<='{updated_date}' GROUP BY {substr} ORDER BY count(*), {substr}")
+
+        result = db.execute_single(sql_select, call_id)
 
         if result is []:
             continue
         else:
             for param in result:
-                # params_to_process.append([db, table, param[0], protocol])
-                params_to_process.append([db, table, param[0], exp_date, updated_date, protocol])
+                params_to_process.append([db, table, param[0], exp_date, updated_date, check_type, protocol])
 
     log.info(f'Tasks (params) to process: {len(params_to_process)}')
     return params_to_process
@@ -73,13 +57,13 @@ def params_preparation(db, tbl_names, tld, protocol):
 
 # This use single query to select all domains from single table that should be checked and starts with 'param' value
 # Is using multi param query to execute update of checked domains in the groups of 40 or less if items left < 40
-def run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id):
+def run_domain_check_param_whois(db, table, param, exp_date, updated_date, check_type, worker_id):
 
-    # Get domains to be checked. If no param defined then check whole table
-    if param is None:
-        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}'))"
-    else:
-        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}')) AND domain LIKE '{param}%'"
+    if check_type == 'expiring':
+        sql_select = f"SELECT name, tld FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}') AND domain LIKE '{param}%'"
+    else:  # This covers check_type == 'recheck'
+        sql_select = f"SELECT name, tld FROM {table} WHERE avail='Y' AND updated<='{updated_date}' AND domain LIKE '{param}%'"
+
     call_id = f'{table} {param} | SELECT'
     sql_result = db.execute_single(sql_select, call_id)
 
@@ -183,13 +167,13 @@ def run_domain_check_param_whois(db, table, param, exp_date, updated_date, worke
             continue
 
 
-def run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id):
+def run_domain_check_param_rdap(db, table, param, exp_date, updated_date, check_type, worker_id):
 
-    # Get domains to be checked. If no param defined then check whole table
-    if param is None:
-        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}'))"
-    else:
-        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}')) AND domain LIKE '{param}%'"
+    if check_type == 'expiring':
+        sql_select = f"SELECT name, tld FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}') AND domain LIKE '{param}%'"
+    else:  # This covers check_type == 'recheck'
+        sql_select = f"SELECT name, tld FROM {table} WHERE avail='Y' AND updated<='{updated_date}' AND domain LIKE '{param}%'"
+
     call_id = f'{table} {param} | SELECT'
     sql_result = db.execute_single(sql_select, call_id)
 

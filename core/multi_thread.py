@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_thread
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-05
+# Rev: 2024-02-16
 
 
 import concurrent.futures
@@ -21,7 +21,8 @@ def worker(task):
     param = task[2]
     exp_date = task[3]
     updated_date = task[4]
-    protocol = task[5]
+    check_type = task[5]
+    protocol = task[6]
 
     thread = threading.current_thread()
     worker_id = thread.name[21:]  # Remove 'ThreadPoolExecutor-0_' from thread.name()
@@ -30,9 +31,9 @@ def worker(task):
     log.debug(f'Worker {worker_id} | TID {thread_tid} | Task {param} / {table} | START')
 
     if protocol == 'rdap':
-        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id)
+        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, check_type, worker_id)
     elif protocol == 'whois':
-        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id)
+        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, check_type, worker_id)
     else:
         log.error(f'Unidentified protocol: {protocol}')
         return
@@ -62,7 +63,7 @@ def create_threads(thread_limit, tasks):
                 # pass
 
 
-def multithreading_run(db, tbl_names, tld, protocol):
+def multithreading_run(db, tbl_names, tld, check_type, protocol):
     gc.enable()  # Enable automatic garbage collection.
     
     cpu = int(multiprocessing.cpu_count())
@@ -77,6 +78,6 @@ def multithreading_run(db, tbl_names, tld, protocol):
 
     log.info(f'Available CPU: {cpu} | Parallel threads to be executed: {thread_limit}')
     log.info(f'Preparing params data...')
-    tasks = domain.params_preparation(db, tbl_names, tld, protocol)
+    tasks = domain.params_preparation(db, tbl_names, tld, check_type, protocol)
     log.info(f'Creating threads...')
     create_threads(thread_limit, tasks)

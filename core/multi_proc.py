@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/multi_proc
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-05
+# Rev: 2024-02-16
 
 import multiprocessing
 import signal
@@ -26,7 +26,8 @@ def worker(task):
     param = task[2]
     exp_date = task[3]
     updated_date = task[4]
-    protocol = task[5]
+    check_type = task[5]
+    protocol = task[6]
 
     process = multiprocessing.current_process()
     worker_id = process.name[16:]  # Remove 'SpawnPoolWorker-' from thread.name()
@@ -34,9 +35,9 @@ def worker(task):
     log.debug(f'{process.name} PID {process.pid} | Task: {param} / {table} | START')
 
     if protocol == 'rdap':
-        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, worker_id)
+        domain.run_domain_check_param_rdap(db, table, param, exp_date, updated_date, check_type, worker_id)
     elif protocol == 'whois':
-        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, worker_id)
+        domain.run_domain_check_param_whois(db, table, param, exp_date, updated_date, check_type, worker_id)
     else:
         log.error(f'Unidentified protocol: {protocol}')
         return
@@ -50,7 +51,7 @@ def worker(task):
     log.debug(f'{process.name} PID {process.pid} | Task: {param} / {table} | END')
 
 
-def multiprocess_run(db, tbl_names, tld, protocol):
+def multiprocess_run(db, tbl_names, tld, check_type, protocol):
     gc.enable()  # Enable automatic garbage collection.
 
     cpu = multiprocessing.cpu_count()
@@ -59,7 +60,7 @@ def multiprocess_run(db, tbl_names, tld, protocol):
 
     log.info(f'Available CPU: {cpu} | Parallel process to be executed: {processes_limit}')
     log.info(f'Preparing params data...')
-    tasks = domain.params_preparation(db, tbl_names, tld, protocol)
+    tasks = domain.params_preparation(db, tbl_names, tld, check_type, protocol)
 
     # Start processing
     pool = multiprocessing.Pool(processes_limit, init_worker, maxtasksperchild=process_clean)

@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/proc_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-31
+# Rev: 2024-02-16
 
 import logging
 
@@ -15,63 +15,92 @@ log = logging.getLogger('main')
 
 
 def run(config_dta):
-    tld = config_dta['DEFAULT']['tld']
+    db_domain_type = config_dta['DOMAIN']['db_type']
+    db_domain_name = config_dta['DOMAIN']['db_name']
+    tld_domain = config_dta['DOMAIN']['tld']
     # remove spaces and split key/value(string) to list using comma as separator of items
-    tbl_names = config_dta['DEFAULT']['tbl_names'].replace(" ", "").split(",")
+    tbl_domain_names = config_dta['DOMAIN']['tbl_names'].replace(" ", "").split(",")
 
-    db_type = config_dta['DEFAULT']['db_type']
-    db_name = config_dta['DEFAULT']['db_name']
+    db_dict_type = config_dta['DICTIONARY']['db_type']
+    db_dict_name = config_dta['DICTIONARY']['db_name']
+    tld_dict = config_dta['DICTIONARY']['tld']
+    # remove spaces and split key/value(string) to list using comma as separator of items
+    tbl_dict_names = config_dta['DICTIONARY']['tbl_names'].replace(" ", "").split(",")
+
     db_retry_limit = int(config_dta['DEFAULT']['db_retry_limit'])
     db_retry_sleep_time = int(config_dta['DEFAULT']['db_retry_sleep_time'])
 
-    # Prepare default db object
-    if db_type == 'sqlite':
+    # Prepare default domain db object
+    if db_domain_type == 'sqlite':
         cfg_db = config_dta['DB.sqlite']
         db_path = cfg_db['db_location']
-        db = sqlite.DB(db_type, db_path, db_name, db_retry_limit)
-    elif db_type == 'postgresql':
+        db_domain = sqlite.DB(db_domain_type, db_path, db_domain_name, db_retry_limit)
+    elif db_domain_type == 'postgresql':
         cfg_db = config_dta['DB.postgres']
         db_host = cfg_db['db_host']
         db_port = cfg_db['db_port']
         user_name = cfg_db['user_name']
         user_password = cfg_db['user_password']
-        db = postgresql.DB(db_type, db_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
+        db_domain = postgresql.DB(db_domain_type, db_domain_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
     else:
         log.critical(f'Error: Incorrect database type')
         return
 
-    log.info('1 - Check domains RDAP [single processing]')
-    log.info('2 - Check domains WHOIS [single processing]')
-    log.info('3 - Check domains RDAP [multiprocessing]')
-    log.info('4 - Check domains WHOIS [multiprocessing]')
-    log.info('5 - Check domains RDAP [multithreading]')
-    log.info('6 - Check domains WHOIS [multithreading]')
+    # Prepare default dictionary db object
+    if db_dict_type == 'sqlite':
+        cfg_db = config_dta['DB.sqlite']
+        db_path = cfg_db['db_location']
+        db_dict = sqlite.DB(db_dict_type, db_path, db_dict_name, db_retry_limit)
+    elif db_dict_type == 'postgresql':
+        cfg_db = config_dta['DB.postgres']
+        db_host = cfg_db['db_host']
+        db_port = cfg_db['db_port']
+        user_name = cfg_db['user_name']
+        user_password = cfg_db['user_password']
+        db_dict = postgresql.DB(db_dict_type, db_dict_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
+    else:
+        log.critical(f'Error: Incorrect database type')
+        return
+
+    log.info('1 - New and expiring domains RDAP [single processing]')
+    log.info('2 - New and expiring domains RDAP [multiprocessing]')
+    log.info('3 - New and expiring domains WHOIS [multithreading]')
+    log.info('4 - Available domains re-check RDAP [single processing]')
+    log.info('5 - Available domains re-check RDAP [multiprocessing]')
+    log.info('6 - Available domains re-check WHOIS [multithreading]')
+
     log.info('Choose option and press Enter: ')
     user_option = input()
 
     if user_option == '1':
-        protocol='rdap'
-        single_proc.single_process_run(db, tbl_names, tld, protocol)
+        protocol = 'rdap'
+        check_type = 'expiring'
+        single_proc.single_process_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
 
-    if user_option == '2':
-        protocol='whois'
-        single_proc.single_process_run(db, tbl_names, tld, protocol)
+    elif user_option == '2':
+        protocol = 'rdap'
+        check_type = 'expiring'
+        multi_proc.multiprocess_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
 
     elif user_option == '3':
-        protocol='rdap'
-        multi_proc.multiprocess_run(db, tbl_names, tld, protocol)
+        protocol = 'whois'
+        check_type = 'expiring'
+        multi_thread.multithreading_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
     
     elif user_option == '4':
-        protocol='whois'
-        multi_proc.multiprocess_run(db, tbl_names, tld, protocol)
+        protocol = 'rdap'
+        check_type = 'recheck'
+        single_proc.single_process_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
 
     elif user_option == '5':
-        protocol='rdap'
-        multi_thread.multithreading_run(db, tbl_names, tld, protocol)
+        protocol = 'rdap'
+        check_type = 'recheck'
+        multi_proc.multiprocess_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
 
     elif user_option == '6':
-        protocol='whois'
-        multi_thread.multithreading_run(db, tbl_names, tld, protocol)
+        protocol = 'whois'
+        check_type = 'recheck'
+        multi_thread.multithreading_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
 
     else:
         log.info('Incorrect option picked')

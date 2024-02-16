@@ -1,6 +1,12 @@
 # CHANGELOG
 
 
+## 0.8.2
+* init, archive and proc modules modified, as part of preapration for dictionary functionality introduction
+* configuration file rebuild
+* re-check functionality for available domains
+
+
 ## 0.8.1
 * domain module improvements and rebuild
 
