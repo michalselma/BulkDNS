@@ -1,7 +1,7 @@
 # Package: BulkDNS
-# Module: core/domain_ops
+# Module: core/domain
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-16
+# Rev: 2024-02-22
 
 import datetime
 import logging
@@ -12,8 +12,8 @@ from core import whois
 log = logging.getLogger('main')
 
 tbl_names_none_param = ['two_digit', 'two_letter', 'two_digit_letter']
-tbl_names_short_param = ['three_digit', 'three_letter', 'three_special']
-tbl_names_medium_param = ['three_digit_letter', 'four_digit', 'four_letter', 'four_digit_letter', 'four_special']
+tbl_names_short_param = ['three_digit', 'three_letter', 'three_special','generic']
+tbl_names_medium_param = ['three_digit_letter', 'four_digit', 'four_letter', 'four_digit_letter', 'four_special', 'english']
 
 
 def params_preparation(db, tbl_names, tld, check_type, protocol):
@@ -60,7 +60,7 @@ def params_preparation(db, tbl_names, tld, check_type, protocol):
 def run_domain_check_param_whois(db, table, param, exp_date, updated_date, check_type, worker_id):
 
     if check_type == 'expiring':
-        sql_select = f"SELECT name, tld FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}') AND domain LIKE '{param}%'"
+        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null AND domain LIKE '{param}%') OR (expiry<='{exp_date}' AND updated<='{updated_date}' AND domain LIKE '{param}%')"
     else:  # This covers check_type == 'recheck'
         sql_select = f"SELECT name, tld FROM {table} WHERE avail='Y' AND updated<='{updated_date}' AND domain LIKE '{param}%'"
 
@@ -170,7 +170,7 @@ def run_domain_check_param_whois(db, table, param, exp_date, updated_date, check
 def run_domain_check_param_rdap(db, table, param, exp_date, updated_date, check_type, worker_id):
 
     if check_type == 'expiring':
-        sql_select = f"SELECT name, tld FROM {table} WHERE updated is null OR (expiry<='{exp_date}' AND updated<='{updated_date}') AND domain LIKE '{param}%'"
+        sql_select = f"SELECT name, tld FROM {table} WHERE (updated is null AND domain LIKE '{param}%') OR (expiry<='{exp_date}' AND updated<='{updated_date}' AND domain LIKE '{param}%')"
     else:  # This covers check_type == 'recheck'
         sql_select = f"SELECT name, tld FROM {table} WHERE avail='Y' AND updated<='{updated_date}' AND domain LIKE '{param}%'"
 

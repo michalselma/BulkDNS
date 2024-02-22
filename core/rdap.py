@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: core/rdap
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-01-31
+# Rev: 2024-02-22
 
 import subprocess
 import json
@@ -19,7 +19,7 @@ def rdap(domain):
     cmd = 'rdap'
     cmd_line = '-r'
     try:
-        command_call = subprocess.run([cmd, cmd_line, domain], capture_output=True, text=True, check=True, shell=True)
+        command_call = subprocess.run([cmd, cmd_line, domain], capture_output=True, text=True, check=True, shell=False, timeout=30)
         # Get command output to variable
         log.debug(f'rdap executed properly: {cmd} {cmd_line} {domain}')
         # If stdout is empty return zero to manage information out of function

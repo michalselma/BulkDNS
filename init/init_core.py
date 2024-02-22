@@ -1,12 +1,13 @@
 # Package: BulkDNS
 # Module: init/init_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-16
+# Rev: 2024-02-22
 
 import logging
 
 from init import init_db
 from init import init_domain
+from init import init_dict
 from common import sqlite
 from common import postgresql
 
@@ -16,15 +17,18 @@ log = logging.getLogger('main')
 def run(config_dta):
     db_domain_type = config_dta['DOMAIN']['db_type']
     db_domain_name = config_dta['DOMAIN']['db_name']
+    db_domain_archive_name = f'{db_domain_name}_taken'
     tld_domain = config_dta['DOMAIN']['tld']
     # remove spaces and split key/value(string) to list using comma as separator of items
     tbl_domain_names = config_dta['DOMAIN']['tbl_names'].replace(" ", "").split(",")
 
     db_dict_type = config_dta['DICTIONARY']['db_type']
     db_dict_name = config_dta['DICTIONARY']['db_name']
+    db_dict_archive_name = f'{db_dict_name}_taken'
     tld_dict = config_dta['DICTIONARY']['tld']
     # remove spaces and split key/value(string) to list using comma as separator of items
     tbl_dict_names = config_dta['DICTIONARY']['tbl_names'].replace(" ", "").split(",")
+    tbl_dict_names_dictionary = config_dta['DICTIONARY']['tbl_names_dict'].replace(" ", "").split(",")
 
     db_retry_limit = int(config_dta['DEFAULT']['db_retry_limit'])
     db_retry_sleep_time = int(config_dta['DEFAULT']['db_retry_sleep_time'])
@@ -37,6 +41,7 @@ def run(config_dta):
         db_path = cfg_db['db_location']
         sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type
         db_domain = sqlite.DB(db_domain_type, db_path, sys_db, db_retry_limit)
+        db_domain_arch = sqlite.DB(db_domain_type, db_path, db_domain_archive_name, db_retry_limit)
     elif db_domain_type == 'postgresql':
         cfg_db = config_dta['DB.postgres']
         sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type
@@ -45,6 +50,7 @@ def run(config_dta):
         user_name = cfg_db['user_name']
         user_password = cfg_db['user_password']
         db_domain = postgresql.DB(db_domain_type, sys_db, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
+        db_domain_arch = postgresql.DB(db_domain_type, db_domain_archive_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
     else:
         log.critical(f'Error: Incorrect database type')
         return
@@ -55,6 +61,7 @@ def run(config_dta):
         db_path = cfg_db['db_location']
         sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type
         db_dict = sqlite.DB(db_dict_type, db_path, sys_db, db_retry_limit)
+        db_dict_arch = sqlite.DB(db_dict_type, db_path, db_dict_archive_name, db_retry_limit)
     elif db_dict_type == 'postgresql':
         cfg_db = config_dta['DB.postgres']
         sys_db = cfg_db['sys_db']  # Taken from config based on specific DB.* config section driven by db_type
@@ -63,6 +70,7 @@ def run(config_dta):
         user_name = cfg_db['user_name']
         user_password = cfg_db['user_password']
         db_dict = postgresql.DB(db_dict_type, sys_db, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
+        db_dict_arch = postgresql.DB(db_dict_type, db_dict_archive_name, db_host, db_port, user_name, user_password, db_retry_limit, db_retry_sleep_time)
     else:
         log.critical(f'Error: Incorrect database type')
         return
@@ -88,6 +96,8 @@ def run(config_dta):
     log.info('1 - Initialize DB and create tables structure')
     log.info('2 - Generate domains')
     log.info('3 - Upload dictionaries')
+    log.info('4 - Create dictionary domains')
+    log.info('5 - Generate and create dictionary domains combinations')
     log.info('Choose option and press Enter: ')
     user_option = input()
 
@@ -115,14 +125,32 @@ def run(config_dta):
         db_backup_name = f'{db_dict_name}_backup'
         init_db.initialize(db_backup, db_backup_name, tbl_dict_names, tld_dict)
 
+        # And dictionary tables in main dictionary db and backup db
+        db_dict.db_name = db_dict_name
+        init_db.initialize_dict(db_dict, tbl_dict_names_dictionary)
+        db_dict.db_name = db_backup_name
+        init_db.initialize_dict(db_backup, tbl_dict_names_dictionary)
+
     elif user_option == '2':
         # Generate char-based domain dictionaries (one, two, three and four char combinations)
         db_domain.db_name = db_domain_name  # Modify default db_name to use domain database
         init_domain.create_domain_dta(db_domain, tbl_domain_names, tld_domain)
 
     elif user_option == '3':
-        # Upload words list
-        print('Not implemented yet...')
+        # Upload language words list and generic list
+        db_dict.db_name = db_dict_name
+        init_dict.upload_dict(db_dict, tbl_dict_names_dictionary)
+
+    elif user_option == '4':
+        # Generate domain dictionary data based on language and generic dictionaries
+        db_dict.db_name = db_dict_name
+        init_dict.create_dict_domains(db_dict, db_dict_arch, tbl_dict_names_dictionary, tld_dict)
+
+    elif user_option == '5':
+        # Generate dictionary combinations
+        db_dict.db_name = db_dict_name
+        init_dict.create_comb_domains(db_dict, db_dict_arch, tbl_dict_names_dictionary, tld_dict)
+        init_dict.create_comb_domains_two_tables(db_dict, db_dict_arch, tbl_dict_names_dictionary[1], tbl_dict_names_dictionary[0], tld_dict)
 
     else:
         log.info('Incorrect option picked')

@@ -76,31 +76,37 @@ def run(config_dta):
         protocol = 'rdap'
         check_type = 'expiring'
         single_proc.single_process_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        single_proc.single_process_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
 
     elif user_option == '2':
         protocol = 'rdap'
         check_type = 'expiring'
         multi_proc.multiprocess_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        multi_proc.multiprocess_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
 
     elif user_option == '3':
         protocol = 'whois'
         check_type = 'expiring'
         multi_thread.multithreading_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        multi_thread.multithreading_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
     
     elif user_option == '4':
         protocol = 'rdap'
         check_type = 'recheck'
         single_proc.single_process_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        single_proc.single_process_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
 
     elif user_option == '5':
         protocol = 'rdap'
         check_type = 'recheck'
         multi_proc.multiprocess_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        multi_proc.multiprocess_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
 
     elif user_option == '6':
         protocol = 'whois'
         check_type = 'recheck'
         multi_thread.multithreading_run(db_domain, tbl_domain_names, tld_domain, check_type, protocol)
+        multi_thread.multithreading_run(db_dict, tbl_dict_names, tld_dict, check_type, protocol)
 
     else:
         log.info('Incorrect option picked')

@@ -13,19 +13,27 @@ def backup_data(db, db_arch, db_backup, tbl_names, tld):
 
     for tbl_name in tbl_names:
         table = f'{tbl_name}_{tld}'
-        log.info(f'Backup of {table} from {db.db_type}:{db.db_name} & {db_arch.db_name} into {db_backup.db_type}:{db_backup.db_name}')
+
+        # If only source and backup provided then it is restore, otherwise it is backup
+        if db_arch is None:
+            log.info(f'Restore {table} from {db.db_type}:{db.db_name} into {db_backup.db_type}:{db_backup.db_name}')
+        else:
+            log.info(f'Backup of {table} from {db.db_type}:{db.db_name} & {db_arch.db_name} into {db_backup.db_type}:{db_backup.db_name}')
 
         log.debug(f'Phase 1: Getting source DB data (live): {db.db_type}/{db.db_name}/{table}')
         src_sql_query = f'SELECT domain, name, tld, avail, expiry, updated FROM {table}'
         call_id = f'{db.db_type} | {table} | SELECT'
         src_db_dta_live = db.execute_single(src_sql_query, call_id)
 
-        log.debug(f'Phase 2: Getting source DB data (arch): {db_arch.db_type}/{db_arch.db_name}/{table}')
-        src_sql_query = f'SELECT domain, name, tld, avail, expiry, updated FROM {table}'
-        call_id = f'{db_arch.db_type} | {table} | SELECT'
-        src_db_dta_arch = db_arch.execute_single(src_sql_query, call_id)
-
-        src_db_dta = src_db_dta_live + src_db_dta_arch
+        if db_arch is None:
+            log.info(f'Arch DB not set. Restore mode. Skipping archive DB...')
+            src_db_dta = src_db_dta_live
+        else:
+            log.debug(f'Phase 2: Getting source DB data (arch): {db_arch.db_type}/{db_arch.db_name}/{table}')
+            src_sql_query = f'SELECT domain, name, tld, avail, expiry, updated FROM {table}'
+            call_id = f'{db_arch.db_type} | {table} | SELECT'
+            src_db_dta_arch = db_arch.execute_single(src_sql_query, call_id)
+            src_db_dta = src_db_dta_live + src_db_dta_arch
 
         src_dta_count = len(src_db_dta)
         log.info(f'Items to be migrated: {src_dta_count}')
@@ -135,24 +143,36 @@ def archiver(db, db_arch, tbl_names, tld, arch_type):
         percent = "{0:.2f}".format(percent)
         log.info(f'{table} | {arch_type} | {percent} % | {src_dta_count} of {domains_amount}')
 
-        log.debug(f'Archiver step 3: Executing data insert into {dst_db.db_type}/{dst_db.db_name}/{table}')
+        log.debug(f'Archiver step 3: Validating insert data and skipping duplicates')
+        call_id = f'{src_db.db_type} | {table} | SELECT'
+        select_sql_query = f"SELECT domain FROM {table}"
+        res = dst_db.execute_single(select_sql_query, call_id)
+        src_dta = []
+        dst_db_dta = [row[0] for row in res]  # Change tuple of single-item tuples to tuple of single-items
+        for src_itm in src_db_dta:
+            if src_itm[0] in dst_db_dta:
+                log.error(f'Domain already exist in destination table: {src_itm[0]}. Will be removed from source table.')
+            else:
+                src_dta.append(src_itm)
+
+        log.debug(f'Archiver step 4: Executing data insert into {dst_db.db_type}/{dst_db.db_name}/{table}')
         call_id = f'{dst_db.db_type} | {table} | INSERT'
         if dst_db.db_type == 'sqlite':
             param_query = f'INSERT INTO {table}(domain, name, tld, avail, expiry, updated) VALUES(?,?,?,?,?,?)'
-            dst_db.execute_many_param(param_query, src_db_dta, call_id)
+            dst_db.execute_many_param(param_query, src_dta, call_id)
         elif dst_db.db_type == 'postgresql':
             param_query = f'INSERT INTO {table}(domain, name, tld, avail, expiry, updated) VALUES(%s,%s,%s,%s,%s,%s)'
-            dst_db.execute_many_param(param_query, src_db_dta, call_id)
+            dst_db.execute_many_param(param_query, src_dta, call_id)
         else:
             log.error(f'Error: Incorrect database type')
             return
 
-        log.debug(f'Archiver step 4: Preparing data to delete from {src_db.db_type}/{src_db.db_name}/{table}')
+        log.debug(f'Archiver step 5: Preparing data to delete from {src_db.db_type}/{src_db.db_name}/{table}')
         src_dta_del = []
         for item in src_db_dta:
             src_dta_del.append([item[0]])
 
-        log.debug(f'Archiver step 5: Delete {len(src_dta_del)} domains from {src_db.db_type}/{src_db.db_name}/{table}')
+        log.debug(f'Archiver step 6: Delete {len(src_dta_del)} domains from {src_db.db_type}/{src_db.db_name}/{table}')
         call_id = f'{src_db.db_type}/{src_db.db_name}/{table} | DELETE'
         if src_db.db_type == 'sqlite':
             param_query = f'DELETE FROM {table} WHERE domain=?'

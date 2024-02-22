@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: arch/arch_core
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-16
+# Rev: 2024-02-22
 
 import logging
 
@@ -93,6 +93,7 @@ def run(config_dta):
     log.info('1 - Archive taken domains expiring in more than 30 days')
     log.info('2 - Restore domains expiring in next 30 days')
     log.info('3 - Migrate / Backup all data to the separate database')
+    log.info('4 - Bring back from backup')
     log.info('Choose option and press Enter: ')
     user_option = input()
 
@@ -115,6 +116,13 @@ def run(config_dta):
         data_ops.backup_data(db_domain, db_domain_arch, db_domain_backup, tbl_domain_names, tld_domain)
         # dictionary
         data_ops.backup_data(db_dict, db_dict_arch, db_dict_backup, tbl_dict_names, tld_dict)
+
+
+    elif user_option == '4':
+        # domains
+        data_ops.backup_data(db_domain_backup, None, db_domain, tbl_domain_names, tld_domain)
+        # dictionary
+        data_ops.backup_data(db_dict_backup, None, db_dict, tbl_dict_names, tld_dict)
 
     else:
         log.info('Incorrect option picked')

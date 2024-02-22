@@ -1,7 +1,7 @@
 # Package: BulkDNS
 # Module: init/init_db
 # Author: Michal Selma <michal@selma.cc>
-# Rev: 2024-02-16
+# Rev: 2024-02-22
 
 import logging
 
@@ -31,10 +31,22 @@ def create_tbl(db, tbl_names, tld):
         db.execute_single(query, call_id)
 
 
+def create_dict_tbl(db, tbl_names):
+    for tbl_name in tbl_names:
+        query = (f'CREATE TABLE {tbl_name} (domain_name VARCHAR(100) PRIMARY KEY NOT NULL, dictionary_term VARCHAR(100), '
+                 f'term_type VARCHAR(50), category VARCHAR(50), comb_use CHARACTER(1))')
+        call_id = f'{tbl_name} | CREATE TABLE'
+        db.execute_single(query, call_id)
+
+
 def initialize(db, new_db_name, tbl_names, tld):
-    # Main operations database for char combinations, taken domains to be moved then to '_taken' db in separate process
     log.info(f'Creating database: {new_db_name}')
     create_db(db, new_db_name)
     db.db_name = new_db_name  # When new db has been created, for tables initialization modify db object to use new db
     log.info(f'Creating tables structure in {new_db_name}...')
     create_tbl(db, tbl_names, tld)
+
+
+def initialize_dict(db, tbl_names):
+    log.info(f'Creating tables structure in {db.db_name}...')
+    create_dict_tbl(db, tbl_names)

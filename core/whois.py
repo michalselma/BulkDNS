@@ -1,5 +1,5 @@
 # Package: BulkDNS
-# Module: core/domain
+# Module: core/whois
 # Author: Michal Selma <michal@selma.cc>
 # Rev: 2024-01-31
 

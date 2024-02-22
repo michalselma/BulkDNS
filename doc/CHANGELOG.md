@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.9
+* Introduction of dictionary check functionality
+* Fix of poor used memory clean-up in multi-process and rdap subprocess components
+* Data consistency & validation checks added to archiving process
 
 ## 0.8.2
 * init, archive and proc modules modified, as part of preapration for dictionary functionality introduction

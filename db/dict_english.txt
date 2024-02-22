@@ -1,0 +1,8 @@
+acid,acid,single,,N
+age,age,single,,Y
+aid,aid,single,,N
+albatross,albatross,single,animal,N
+alligator,alligator,single,animal,N
+any,any,single,,N
+aram,aram,single,,N
+aunt,aunt,single,,N

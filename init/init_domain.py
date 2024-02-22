@@ -1,5 +1,5 @@
 # Package: BulkDNS
-# Module: init/init_dict
+# Module: init/init_domain
 # Author: Michal Selma <michal@selma.cc>
 # Rev: 2024-02-16
 
